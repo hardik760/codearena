@@ -11,12 +11,13 @@ class AggregatorService {
         if (!username) return null;
         try {
             const headers = process.env.GITHUB_TOKEN ? { Authorization: `token ${process.env.GITHUB_TOKEN}` } : {};
+            const timeout = 5000;
 
             // Basic User Info
-            const res = await axios.get(`https://api.github.com/users/${username}`, { headers });
+            const res = await axios.get(`https://api.github.com/users/${username}`, { headers, timeout });
 
             // Public Repos to extract language
-            const repos = await axios.get(`https://api.github.com/users/${username}/repos?per_page=100`, { headers });
+            const repos = await axios.get(`https://api.github.com/users/${username}/repos?per_page=100`, { headers, timeout });
             const languages = {};
             repos.data.forEach(repo => {
                 if (repo.language) {
@@ -28,7 +29,7 @@ class AggregatorService {
             // but accurate heatmap requires scraping or GraphQL. We'll simulate 90 days of events for the fallback)
             let calendarMap = [];
             try {
-                const events = await axios.get(`https://api.github.com/users/${username}/events`, { headers });
+                const events = await axios.get(`https://api.github.com/users/${username}/events`, { headers, timeout });
                 const recentMap = {};
                 events.data.forEach(event => {
                     const dateStr = event.created_at.split('T')[0];
@@ -62,8 +63,9 @@ class AggregatorService {
     async getCodeforcesStats(handle) {
         if (!handle) return null;
         try {
-            const infoRes = await axios.get(`https://codeforces.com/api/user.info?handles=${handle}`);
-            const statusRes = await axios.get(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=5000`);
+            const timeout = 5000;
+            const infoRes = await axios.get(`https://codeforces.com/api/user.info?handles=${handle}`, { timeout });
+            const statusRes = await axios.get(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=5000`, { timeout });
 
             if (infoRes.data.status !== "OK") return null;
 
@@ -118,10 +120,12 @@ class AggregatorService {
     `;
 
         try {
+            const timeout = 5000;
             const res = await axios.post("https://leetcode.com/graphql", {
                 query,
                 variables: { username }
             }, {
+                timeout,
                 headers: {
                     "Content-Type": "application/json",
                     "User-Agent": "Mozilla/5.0"
