@@ -18,7 +18,10 @@ mongoose.connect(MONGO_URI)
   .catch(err => console.log("Mongo Error:", err));
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  credentials: true
+}));
 app.use(express.json());
 
 // Rate Limiter

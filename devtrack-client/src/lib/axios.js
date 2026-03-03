@@ -1,7 +1,13 @@
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
+if (!API_BASE) {
+    console.error("CRITICAL: VITE_API_URL is missing. API calls will fail.");
+}
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5003/api",
+    baseURL: API_BASE ? `${API_BASE}/api` : "",
 });
 
 // ✅ Attach JWT token to every request
