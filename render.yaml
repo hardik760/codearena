@@ -26,7 +26,6 @@ services:
   - type: web
     name: devtrack-frontend
     runtime: static
-    plan: free
     rootDir: devtrack-client
     buildCommand: npm install && npm run build
     staticPublishPath: dist
