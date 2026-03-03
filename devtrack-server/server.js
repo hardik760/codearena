@@ -50,11 +50,14 @@ io.on("connection", (socket) => {
   });
 });
 
+const analyticsRoutes = require("./routes/analyticsRoutes");
+
 // Routes
 app.use("/api/progress", progressRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Start Server
 server.listen(5003, () => {
-  console.log("Server running on port 5003"); // 🔥 fix log also
+  console.log("Server running on port 5003");
 });

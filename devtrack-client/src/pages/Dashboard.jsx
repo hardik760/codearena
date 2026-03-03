@@ -1,204 +1,148 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import socket from "../socket";
+import { useState, useEffect } from "react";
+import {
+  BarChart3,
+  Github,
+  Code,
+  Trophy,
+  Users,
+  FileText,
+  Briefcase,
+  Settings,
+  Activity,
+  Target,
+  Zap
+} from "lucide-react";
+import toast from "react-hot-toast";
+
+import Layout from "../components/Layout";
+import StatCard from "../components/StatCard";
+import AnalyticsChart from "../components/AnalyticsChart";
+import Heatmap from "../components/Heatmap";
+import { getDeveloperStats } from "../lib/analytics";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const [progress, setProgress] = useState([]);
-  const [search, setSearch] = useState("");
-  const [platform, setPlatform] = useState("");
-  const [solved, setSolved] = useState("");
-
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
-  // 🔥 Fetch Progress with Pagination
-  const fetchProgress = async (pageNumber = 1, searchTerm = search) => {
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await axios.get(
-        `http://localhost:5003/api/progress?page=${pageNumber}&limit=5&search=${searchTerm}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-
-      setProgress(res.data.data);
-      setTotalPages(res.data.totalPages);
-      setPage(res.data.page);
-
-    } catch (err) {
-      console.error("Error fetching progress");
-    }
-  };
-  // 🔥 Add Progress
-  const handleAddProgress = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      await axios.post(
-        "http://localhost:5003/api/progress",
-        { platform, solved },
-        {
-          headers: { Authorization: token },
-        }
-      );
-
-      setPlatform("");
-      setSolved("");
-
-    } catch (err) {
-      alert("Error adding progress");
-    }
-  };
-
-  // 🔥 Delete Progress
-  const handleDelete = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-
-      await axios.delete(
-        `http://localhost:5003/api/progress/${id}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-
-    } catch (err) {
-      alert("Error deleting progress");
-    }
-  };
-
-  // 🔥 Logout
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
-  };
-
-  // 🔥 On Mount
   useEffect(() => {
-    fetchProgress();
-
-    socket.on("progress-updated", () => {
-      fetchProgress(page);
-    });
-
-    return () => {
-      socket.off("progress-updated");
+    const fetchStats = async () => {
+      try {
+        const data = await getDeveloperStats();
+        setStats(data);
+      } catch (err) {
+        toast.error("Failed to fetch coding stats");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [page]);
+    fetchStats();
+  }, []);
+
+  if (loading) return (
+    <Layout title="Dashboard">
+      <div className="animate-pulse space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-white/5 rounded-2xl" />)}
+        </div>
+        <div className="h-96 bg-white/5 rounded-2xl w-full" />
+      </div>
+    </Layout>
+  );
+
+  const github = stats?.github?.stats || {};
+  const leetcode = stats?.leetcode?.stats || {};
+  const codeforces = stats?.codeforces?.stats || {};
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <Layout title="Developer Analytics">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My Progress</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 px-4 py-2 rounded hover:bg-red-700"
-        >
-          Logout
-        </button>
-      </div>
+        {/* Unified Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            icon={Trophy}
+            label="LeetCode Solved"
+            value={leetcode.totalSolved || 0}
+            color="amber"
+          />
+          <StatCard
+            icon={Activity}
+            label="CF Max Rating"
+            value={codeforces.maxRating || 0}
+            color="emerald"
+          />
+          <StatCard
+            icon={Github}
+            label="GitHub Repos"
+            value={github.public_repos || 0}
+            color="violet"
+          />
+          <StatCard
+            icon={Zap}
+            label="Consistency Score"
+            value={`${stats?.consistencyScore || 0}%`}
+            color="blue"
+          />
+        </div>
 
-      {/* Add Progress */}
-      <div className="bg-gray-800 p-6 rounded mb-8">
-        <h2 className="text-xl mb-4 font-semibold">Add Progress</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Performance Graph */}
+          <div className="lg:col-span-2">
+            <AnalyticsChart
+              title="Coding Activity Trend"
+              data={[
+                { name: "Mon", value: 12 },
+                { name: "Tue", value: 19 },
+                { name: "Wed", value: 3 },
+                { name: "Thu", value: 5 },
+                { name: "Fri", value: 2 },
+                { name: "Sat", value: 3 },
+                { name: "Sun", value: 10 },
+              ]}
+            />
+          </div>
 
-        <input
-          type="text"
-          placeholder="Platform (LeetCode, Codeforces)"
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value)}
-          className="w-full p-3 mb-4 rounded bg-gray-700 outline-none"
-        />
-
-        <input
-          type="number"
-          placeholder="Solved Count"
-          value={solved}
-          onChange={(e) => setSolved(e.target.value)}
-          className="w-full p-3 mb-4 rounded bg-gray-700 outline-none"
-        />
-
-        <button
-          onClick={handleAddProgress}
-          className="bg-green-600 px-6 py-2 rounded hover:bg-green-700"
-        >
-          Add Progress
-        </button>
-      </div>
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search by platform..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            fetchProgress(1, e.target.value);
-          }}
-          className="w-full p-3 rounded bg-gray-800"
-        />
-      </div>
-
-      {/* Progress List */}
-      <div>
-        {progress.length === 0 ? (
-          <p className="text-gray-400">No progress added yet.</p>
-        ) : (
-          progress.map((item) => (
-            <div
-              key={item._id}
-              className="bg-gray-800 p-4 mb-4 rounded flex justify-between items-center"
-            >
+          {/* Platform Distribution Card */}
+          <div className="bg-[#111120] border border-white/5 rounded-2xl p-6 shadow-xl">
+            <h3 className="text-white font-semibold text-lg mb-6">Skill Breakdown</h3>
+            <div className="space-y-6">
               <div>
-                <p className="text-lg font-semibold">
-                  Platform: {item.platform}
-                </p>
-                <p className="text-gray-300">
-                  Solved: {item.solved}
-                </p>
+                <div className="flex justify-between text-xs text-white/40 mb-2">
+                  <span>Logic & Data Structures</span>
+                  <span>{Math.round((leetcode.totalSolved / 500) * 100) || 0}%</span>
+                </div>
+                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-500/60 rounded-full" style={{ width: `${(leetcode.totalSolved / 500) * 100}%` }} />
+                </div>
               </div>
-
-              <button
-                onClick={() => handleDelete(item._id)}
-                className="bg-red-600 px-4 py-2 rounded hover:bg-red-700"
-              >
-                Delete
-              </button>
+              <div>
+                <div className="flex justify-between text-xs text-white/40 mb-2">
+                  <span>Competitive Coding</span>
+                  <span>{Math.round((codeforces.rating / 2000) * 100) || 0}%</span>
+                </div>
+                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500/60 rounded-full" style={{ width: `${(codeforces.rating / 2000) * 100}%` }} />
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-xs text-white/40 mb-2">
+                  <span>System Design & Projects</span>
+                  <span>{Math.round((github.public_repos / 50) * 100) || 0}%</span>
+                </div>
+                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-violet-500/60 rounded-full" style={{ width: `${(github.public_repos / 50) * 100}%` }} />
+                </div>
+              </div>
             </div>
-          ))
-        )}
+          </div>
+        </div>
+
+        {/* Heatmap Section */}
+        <Heatmap color="violet" />
+
       </div>
-
-      {/* Pagination */}
-      <div className="flex gap-4 mt-6 items-center">
-        <button
-          disabled={page === 1}
-          onClick={() => fetchProgress(page - 1)}
-          className="bg-gray-700 px-4 py-2 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-
-        <span>
-          Page {page} of {totalPages}
-        </span>
-
-        <button
-          disabled={page === totalPages}
-          onClick={() => fetchProgress(page + 1)}
-          className="bg-gray-700 px-4 py-2 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
-
-    </div>
+    </Layout>
   );
 }
