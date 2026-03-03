@@ -18,9 +18,15 @@ exports.getProgress = async (req, res) => {
 
     const key = `progress:${userId}:page:${page}:search:${search}`;
 
-    const cached = await client.get(key);
-    if (cached) {
-      return res.json(JSON.parse(cached));
+    if (client.isOpen) {
+      try {
+        const cached = await client.get(key);
+        if (cached) {
+          return res.json(JSON.parse(cached));
+        }
+      } catch (cacheErr) {
+        console.error("Redis Get Error:", cacheErr.message);
+      }
     }
 
     const data = await Progress.find(filter)
@@ -37,7 +43,13 @@ exports.getProgress = async (req, res) => {
       totalPages: Math.ceil(total / limit),
     };
 
-    await client.setEx(key, 60, JSON.stringify(response));
+    if (client.isOpen) {
+      try {
+        await client.setEx(key, 60, JSON.stringify(response));
+      } catch (cacheErr) {
+        console.error("Redis Set Error:", cacheErr.message);
+      }
+    }
 
     res.json(response);
 
@@ -54,8 +66,14 @@ exports.createProgress = async (req, res) => {
     });
 
     // Clear cache
-    const key = `progress:${req.user.id}`;
-    await client.del(key);
+    if (client.isOpen) {
+      try {
+        const key = `progress:${req.user.id}`;
+        await client.del(key);
+      } catch (cacheErr) {
+        console.error("Redis Del Error:", cacheErr.message);
+      }
+    }
 
     // 🔥 Emit real-time update
     req.io.emit("progress-updated", progress);
