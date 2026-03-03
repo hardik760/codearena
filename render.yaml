@@ -29,13 +29,13 @@ services:
     plan: free
     rootDir: devtrack-client
     buildCommand: npm install && npm run build
-    staticPublishDir: dist
+    publishDir: dist
     envVars:
       - key: VITE_API_URL
         sync: false # Set this in Render Dashboard to your backend URL + /api
 
-# Redis for Caching Aggregator Results
-redis:
-  - name: devtrack-redis
+  # Redis for Caching Aggregator Results
+  - type: redis
+    name: devtrack-redis
     plan: free
     ipAllowList: [] # Only allow internal connections
