@@ -88,8 +88,14 @@ exports.deleteProgress = async (req, res) => {
   try {
     await Progress.findByIdAndDelete(req.params.id);
 
-    const key = `progress:${req.user.id}`;
-    await client.del(key);
+    if (client.isOpen) {
+      try {
+        const key = `progress:${req.user.id}`;
+        await client.del(key);
+      } catch (cacheErr) {
+        console.error("Redis Del Error:", cacheErr.message);
+      }
+    }
 
     res.json({ message: "Deleted successfully" });
   } catch (err) {
