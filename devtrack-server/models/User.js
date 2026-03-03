@@ -11,6 +11,14 @@ const userSchema = new mongoose.Schema({
   bio: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
   profileImage: String,
+  lastSyncedAt: { type: Date, default: null },
+  cachedStats: {
+    totalSolved: { type: Number, default: 0 },
+    maxRating: { type: Number, default: 0 },
+    repoCount: { type: Number, default: 0 },
+    followers: { type: Number, default: 0 },
+    consistencyScore: { type: Number, default: 0 }
+  }
 });
 
 module.exports = mongoose.model("User", userSchema);
