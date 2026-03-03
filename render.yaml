@@ -23,9 +23,8 @@ services:
           property: connectionString
 
   # Frontend Service (Static Site)
-  - type: web
+  - type: static
     name: devtrack-frontend
-    runtime: static
     plan: free
     rootDir: devtrack-client
     buildCommand: npm install && npm run build
