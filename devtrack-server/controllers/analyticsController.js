@@ -110,10 +110,14 @@ exports.updateProfileHandles = async (req, res) => {
             { new: true }
         );
 
-        // Invalidate cache since handles changed
+        // Invalidate cache since handles changed, but don't let it hang the response
         if (client.isOpen) {
             try {
-                await client.del(`analytics:${req.user.id}`);
+                // Fire and forget, or tight timeout
+                Promise.race([
+                    client.del(`analytics:${req.user.id}`),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 2000))
+                ]).catch(err => console.error("Redis Cache Del Error:", err.message));
             } catch (err) {
                 console.error("Redis Cache Del Error:", err.message);
             }
