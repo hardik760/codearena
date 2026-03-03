@@ -17,24 +17,16 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: devtrack-redis
-          property: connectionString
+        sync: false # Set this manually in Render if you have an existing Redis
 
   # Frontend Service (Static Site)
   - type: web
     name: devtrack-frontend
     runtime: static
+    plan: free
     rootDir: devtrack-client
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         sync: false
-
-  # Redis for Caching
-  - type: keyvalue
-    name: devtrack-redis
-    plan: free
-    ipAllowList: []
