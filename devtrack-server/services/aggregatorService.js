@@ -63,9 +63,9 @@ class AggregatorService {
     async getCodeforcesStats(handle) {
         if (!handle) return null;
         try {
-            const timeout = 5000;
+            const timeout = 8000;
             const infoRes = await axios.get(`https://codeforces.com/api/user.info?handles=${handle}`, { timeout });
-            const statusRes = await axios.get(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=5000`, { timeout });
+            const statusRes = await axios.get(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=500`, { timeout });
 
             if (infoRes.data.status !== "OK") return null;
 

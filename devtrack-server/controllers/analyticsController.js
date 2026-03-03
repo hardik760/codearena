@@ -71,13 +71,13 @@ exports.getUserAnalytics = async (req, res) => {
             consistencyScore
         };
 
-        // 5. Update Database Minimal Metadata
+        // 5. Update Database Minimal Metadata without deleting old stats if API fails
         user.cachedStats = {
-            totalSolved: leetcode?.totalSolved || 0,
-            maxRating: codeforces?.maxRating || 0,
-            repoCount: github?.public_repos || 0,
-            followers: github?.followers || 0,
-            consistencyScore
+            totalSolved: leetcode ? leetcode.totalSolved : (user.cachedStats?.totalSolved || 0),
+            maxRating: codeforces ? codeforces.maxRating : (user.cachedStats?.maxRating || 0),
+            repoCount: github ? github.public_repos : (user.cachedStats?.repoCount || 0),
+            followers: github ? github.followers : (user.cachedStats?.followers || 0),
+            consistencyScore: consistencyScore || user.cachedStats?.consistencyScore || 0
         };
         user.lastSyncedAt = new Date();
         await user.save();

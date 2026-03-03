@@ -55,6 +55,27 @@ export default function Dashboard() {
   const codeforces = stats?.codeforces || {};
   const unifiedHeatmap = stats?.unifiedHeatmap || [];
 
+  const hasData = stats?.github || stats?.leetcode || stats?.codeforces || unifiedHeatmap.length > 0;
+
+  if (!hasData) return (
+    <Layout title="Developer Analytics">
+      <div className="max-w-3xl mx-auto mt-20 text-center space-y-6 bg-[#111120] border border-white/5 rounded-2xl p-10 shadow-xl">
+        <div className="w-16 h-16 bg-violet-500/20 text-violet-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Settings size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-white">No Analytics Data Found</h2>
+        <p className="text-white/50 text-base max-w-lg mx-auto leading-relaxed">
+          We couldn't fetch any coding data. This could be because your handles are incorrect, or the external platforms (GitHub, LeetCode, Codeforces) are temporarily rate-limiting requests.
+        </p>
+        <div className="pt-4">
+          <a href="/settings" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white bg-violet-600 hover:bg-violet-500 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] hover:shadow-[0_0_20px_rgba(124,58,237,0.5)]">
+            Configure Handles
+          </a>
+        </div>
+      </div>
+    </Layout>
+  );
+
   return (
     <Layout title="Developer Analytics">
       <div className="max-w-7xl mx-auto space-y-8">
