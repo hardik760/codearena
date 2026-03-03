@@ -59,6 +59,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
 // Start Server
-server.listen(5003, () => {
-  console.log("Server running on port 5003");
+const PORT = process.env.PORT || 5003;
+server.listen(PORT, () => {
+  console.log("Server running on port ${PORT}");
 });
