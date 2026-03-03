@@ -13,9 +13,9 @@ services:
       - key: PORT
         value: 5003
       - key: MONGO_URI
-        sync: false # Set this in Render Dashboard (e.g. MongoDB Atlas)
+        sync: false
       - key: JWT_SECRET
-        sync: false # Set this in Render Dashboard
+        sync: false
       - key: REDIS_URL
         fromService:
           type: redis
@@ -23,18 +23,19 @@ services:
           property: connectionString
 
   # Frontend Service (Static Site)
-  - type: static
+  - type: web
     name: devtrack-frontend
+    runtime: static
     plan: free
     rootDir: devtrack-client
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishDir: dist
     envVars:
       - key: VITE_API_URL
-        sync: false # Set this in Render Dashboard to your backend URL + /api
+        sync: false
 
-  # Redis for Caching Aggregator Results
+  # Redis for Caching
   - type: redis
     name: devtrack-redis
     plan: free
-    ipAllowList: [] # Only allow internal connections
+    ipAllowList: []
