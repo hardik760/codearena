@@ -1,0 +1,41 @@
+services:
+  # Backend Service (Node.js)
+  - type: web
+    name: devtrack-backend
+    runtime: node
+    plan: free
+    rootDir: devtrack-server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5003
+      - key: MONGO_URI
+        sync: false # Set this in Render Dashboard (e.g. MongoDB Atlas)
+      - key: JWT_SECRET
+        sync: false # Set this in Render Dashboard
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: devtrack-redis
+          property: connectionString
+
+  # Frontend Service (Static Site)
+  - type: web
+    name: devtrack-frontend
+    runtime: static
+    plan: free
+    rootDir: devtrack-client
+    buildCommand: npm install && npm run build
+    staticPublishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # Set this in Render Dashboard to your backend URL + /api
+
+# Redis for Caching Aggregator Results
+redis:
+  - name: devtrack-redis
+    plan: free
+    ipAllowList: [] # Only allow internal connections
