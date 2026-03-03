@@ -12,7 +12,8 @@ const authRoutes = require("./routes/authRoutes");
 const app = express();
 
 // 🔥 CONNECT TO MONGODB
-mongoose.connect("mongodb://127.0.0.1:27017/devtrack")
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/devtrack";
+mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log("Mongo Error:", err));
 
