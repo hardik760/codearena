@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, LogOut, Code2, Home } from "lucide-react";
+import { BarChart3, LogOut, Code2, Home, Settings as SettingsIcon } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -58,6 +58,19 @@ export default function Sidebar() {
                     <span className="ml-auto text-xs bg-white/5 text-white/30 px-2 py-0.5 rounded-full">
                         Soon
                     </span>
+                </NavLink>
+
+                <NavLink
+                    to="/settings"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                            ? "bg-violet-500/10 text-violet-400 border border-violet-500/20"
+                            : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                        }`
+                    }
+                >
+                    <SettingsIcon size={17} />
+                    Settings
                 </NavLink>
             </nav>
 
