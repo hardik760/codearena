@@ -21,10 +21,10 @@ services:
   # Frontend Service (Static Site)
   - type: web
     name: devtrack-frontend
-    runtime: static
+    env: static
     rootDir: devtrack-client
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
