@@ -19,7 +19,7 @@ mongoose.connect(MONGO_URI)
 
 // Middlewares
 app.use(cors({
-  origin: "*",
+  origin: ["https://devtrack-frontend-new.onrender.com", "http://localhost:5173"],
   credentials: true
 }));
 app.use(express.json());
@@ -36,7 +36,7 @@ const server = http.createServer(app);
 
 // Create Socket Server
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: { origin: ["https://devtrack-frontend-new.onrender.com", "http://localhost:5173"] },
 });
 
 // Make io available everywhere
@@ -57,11 +57,15 @@ io.on("connection", (socket) => {
 const analyticsRoutes = require("./routes/analyticsRoutes");
 
 // Routes
+app.get("/", (req, res) => {
+  res.json({ message: "DevTrack Backend is running", status: "online" });
+});
+
 app.use("/api/progress", progressRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-// Start Server
+// Start Server    
 const PORT = process.env.PORT || 5003;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
